@@ -228,8 +228,21 @@ class App:
             
         self.window.after(self.delay, self.update)
 
+    #draw a rectangle when left button of the mouse is clicked - David
     def on_move_press(self, event):
-        pass
+        self.currentX, self.currentY = (event.x, event.y)
+        if self.currentX>self.xLimit:
+            self.currentX=self.xLimit
+        if self.currentY>self.yLimit:
+            self.currentY=self.yLimit
+        self.vX.set("X="+str(self.currentX))
+        self.vY.set("Y="+str(self.currentY))
+        if self.line1:
+            self.canvas.delete(self.line1)
+        if self.line2:
+            self.canvas.delete(self.line2)
+        self.line1=self.canvas.create_line(0, self.currentY, self.xLimit , self.currentY,fill='lime green',state='hidden')
+        self.line2=self.canvas.create_line(self.currentX, 0, self.currentX, self.yLimit,fill='lime green',state='hidden')
         
     def on_button_press(self, event):
         pass
@@ -264,9 +277,22 @@ class App:
     def openLogFile(self):
         pass
 
-
+    #delete area - David
     def deleteArea(self):
-        pass
+        scanAll=False
+        while(not scanAll):
+            scanAll=True
+            for index, name in enumerate(self.areaName):
+                if name==self.areaNameEntry.get():
+                    self.nameObject.pop(index)
+                    self.areaObject.pop(index)
+                    self.areaName.pop(index)
+                    self.areaCoord.pop(index)
+                    self.aiResult.pop(index)
+                    scanAll=False
+                    break
+        self.selectArea_cb['values']=self.areaName
+        self.selectArea_cb['state']='readonly'
   
     def changeOverlayLine(self):
         pass
