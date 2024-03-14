@@ -314,33 +314,9 @@ def checkImage(image):
 
 
 def prepareImageM(image,nsize,display=False,color='COLOR'):
-    # CV2===============
-    if color=='GRAY' or color=='BW':
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-
-    image = cv2.resize(image, (nsize,nsize))
-
-    if color=='BW':
-        (thresh, image) = cv2.threshold(image, 128, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
-    
-    if display:
-        checkImage(image)
-    tv = np.array(image.flat)
-    return tv
+    pass
 
 def prepareImageF(file, nsize,display=False,color='COLOR'):
-    if color=='COLOR':
-        image = cv2.imread(file, cv2.IMREAD_COLOR)
-    if color=='GRAY' or color=='BW':
-        image = cv2.imread(file, cv2.IMREAD_GRAYSCALE)
-
-    image = cv2.resize(image, (nsize, nsize))   
-    if color=='BW':
-        (thresh, image) = cv2.threshold(image, 128, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
-    
-    if display:
-        checkImage(image)
-    tv = np.array(image.flat)
-    return tv
+    pass
 
 App(Tk(), "Automatic data logger"+" "+version,0)
