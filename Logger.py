@@ -312,7 +312,7 @@ def checkImage(image):
     cv2.moveWindow('Check Image', 40+640+20,40)
     cv2.waitKey(displayTime)
 
-
+ # Change image color to balck and white
 def prepareImageM(image,nsize,display=False,color='COLOR'):
     # CV2===============
     if color=='GRAY' or color=='BW':
