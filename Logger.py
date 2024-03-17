@@ -224,7 +224,32 @@ class App:
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             self.photo = ImageTk.PhotoImage(image = Image.fromarray(frame))
             self.canvas.create_image(0, 0, image = self.photo, anchor = 'nw')
-            
+            if self.line1:
+                self.canvas.itemconfig(self.line1, state='normal')
+                self.canvas.itemconfig(self.line2, state='normal')
+                self.canvas.tag_raise(self.line1)
+                self.canvas.tag_raise(self.line2)
+            if self.vOverLine.get()!='NONE':
+                if self.vOverLine.get()=='CENT':
+                    self.canvas.itemconfig(self.overLine1, state='normal')
+                    self.canvas.itemconfig(self.overLine2, state='normal')
+                    self.canvas.tag_raise(self.overLine1)
+                    self.canvas.tag_raise(self.overLine2)
+                elif self.vOverLine.get()=='GRID':
+                    for gridLine in self.overGrid:
+                        self.canvas.itemconfig(gridLine, state='normal')
+                        self.canvas.tag_raise(gridLine)
+            if self.setArea:
+                self.temporaryArea=self.canvas.create_rectangle(self.startX, self.startY, self.currentX, self.currentY,fill="",outline= "GREEN")
+            if self.areaObject:
+                for area in self.areaObject:
+                    self.canvas.tag_raise(area)
+                for name in self.nameObject:
+                    self.canvas.tag_raise(name)
+            if self.var_checkB1.get():
+                for result in self.aiResult:
+                    if result:
+                        self.canvas.tag_raise(result)
             
         self.window.after(self.delay, self.update)
 
