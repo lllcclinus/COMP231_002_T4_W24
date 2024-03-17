@@ -228,7 +228,7 @@ class App:
             
         self.window.after(self.delay, self.update)
 
-    #draw a rectangle when left button of the mouse is clicked - David
+    # cross lines to indicate the location of mouse pointer - David
     def on_move_press(self, event):
         self.currentX, self.currentY = (event.x, event.y)
         if self.currentX>self.xLimit:
@@ -243,13 +243,32 @@ class App:
             self.canvas.delete(self.line2)
         self.line1=self.canvas.create_line(0, self.currentY, self.xLimit , self.currentY,fill='lime green',state='hidden')
         self.line2=self.canvas.create_line(self.currentX, 0, self.currentX, self.yLimit,fill='lime green',state='hidden')
-        
+
+# Code to draw a rectangle when left button of the mouse is clicked - Fatima 
     def on_button_press(self, event):
-        pass
+        self.setArea=not self.setArea
+        if self.setArea:
+            self.startX,self.startY=(event.x,event.y)
+        else:
+            self.areaObject.append(self.canvas.create_rectangle(self.startX, self.startY, self.currentX, self.currentY,fill="",outline= "LIME"))
+            if self.areaNameEntry.get() and not self.areaNameEntry.get().isspace():
+                self.nameObject.append(self.canvas.create_text(self.startX+3, self.startY-10, text=self.areaNameEntry.get(), fill="LIME", font=('Helvetica 15'), anchor='w'))
+                self.areaName.append(self.areaNameEntry.get())
+            else:
+                self.areaNumber=self.areaNumber+1
+                self.nameObject.append(self.canvas.create_text(self.startX+3, self.startY-10, text=str(self.areaNumber), fill="LIME", font=('Helvetica 15'), anchor='w'))
+                self.areaName.append(str(self.areaNumber))
+            self.areaCoord.append([min(self.startX,self.currentX), min(self.startY,self.currentY), max(self.currentX,self.startX), max(self.currentY,self.startY)])
+            self.selectArea_cb['values']=self.areaName
+            self.selectArea_cb['state']='readonly'
+            self.aiResult.append(None)
+            print(self.areaName[-1]+'@',self.canvas.coords(self.areaObject[-1]))
+            print(self.areaName[-1]+'#',self.areaCoord[-1])
 
         
     def b3button(self,event):
-        pass
+        self.setArea=False
+        self.temporaryArea=None
 
     def save(self):
         pass
