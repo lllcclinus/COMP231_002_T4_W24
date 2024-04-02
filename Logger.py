@@ -1,7 +1,7 @@
 #COMP231-002 Team4
 #301296260 Chung Ching Lai
 #301279252 Man Fai Kwan
-#3xxxxxxxx yyyyyyyyyyyyyyy
+#301282811 Man Chun Lam
 #3xxxxxxxx yyyyyyyyyyyyyyy
 #3xxxxxxxx yyyyyyyyyyyyyyy
 #3xxxxxxxx yyyyyyyyyyyyyyy
@@ -298,8 +298,50 @@ class App:
     def save(self):
         pass
 
+    # save setting file function - David
     def saveSetting(self):
-        pass
+        saveFile=False
+        if self.settingFileEntry.get() and (not self.settingFileEntry.get().isspace()):
+            if os.path.exists(self.settingFileEntry.get()+'.xlsx'):
+                response = messagebox.askyesno("Question","Overwrite the existing file?")
+                if response:
+                    saveFile=True
+            else:
+                saveFile=True
+
+            if saveFile:
+                wb=openpyxl.Workbook()
+                worksheet=wb.active
+                worksheet.title='Sheet1'
+                row = 1
+                for index, name in enumerate(self.areaName):
+                    x1,y1,x2,y2 = self.areaCoord[index]
+                    worksheet.cell(row = row, column = 1).value = 'AREA'
+                    worksheet.cell(row = row, column = 2).value = name
+                    worksheet.cell(row = row, column = 3).value = x1
+                    worksheet.cell(row = row, column = 4).value = y1
+                    worksheet.cell(row = row, column = 5).value = x2
+                    worksheet.cell(row = row, column = 6).value = y2
+                    row = row + 1
+                for index, imgName in enumerate(self.rawImgName):
+                    worksheet.cell(row = row, column = 1).value = 'MAPPING'
+                    worksheet.cell(row = row, column = 2).value = imgName
+                    worksheet.cell(row = row, column = 3).value = self.rawLabel[index]
+                    row = row + 1
+                worksheet.cell(row = row, column = 1).value = 'AICOLOR'
+                worksheet.cell(row = row, column = 2).value = self.aiColor.get()
+                row = row + 1
+                worksheet.cell(row = row, column = 1).value = 'INTERVAL'
+                worksheet.cell(row = row, column = 2).value = self.hour_cb.get()
+                worksheet.cell(row = row, column = 3).value = self.minute_cb.get()
+                worksheet.cell(row = row, column = 4).value = self.second_cb.get()
+                row = row + 1
+                worksheet.cell(row = row, column = 1).value = 'LOGFILE'
+                worksheet.cell(row = row, column = 2).value = self.logFileEntry.get()
+                row = row + 1
+                worksheet.cell(row = row, column = 1).value = 'LOGFORMAT'
+                worksheet.cell(row = row, column = 2).value = self.logFormatEntry.get()
+                wb.save(filename=self.settingFileEntry.get()+".xlsx")
 
     def loadSetting(self):
         pass
