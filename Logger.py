@@ -19,7 +19,7 @@ from datetime import datetime ,timedelta
 import re
 
 version="V00"
-demoMode=False
+demoMode=True
 demoVideo='shorttest.mp4'
 ###### AI parameters ###########################
 nSize   = 50     #pixel of training images
