@@ -296,7 +296,22 @@ class App:
         self.temporaryArea=None
 
     def save(self):
-        pass
+        if self.selectArea_cb.get():
+            response = False
+            if os.path.exists('./reference/'+self.captureFileEntry.get()+'.bmp'):
+                    response = messagebox.askyesno("Question","Overwrite the existing file?")
+            else:
+                    response=True
+
+            if response:
+                for index, name in enumerate(self.areaName):
+                    if name==self.selectArea_cb.get():
+                        startCol,startRow,endCol,endRow=self.areaCoord[index]
+                        ret, frame = self.vid.get_frame()
+                        crop = frame[int(startRow):int(endRow),int(startCol):int(endCol)]
+                        if self.captureFileEntry.get() and not self.captureFileEntry.get().isspace():
+                            cv2.imwrite('./reference/'+self.captureFileEntry.get()+".bmp",crop)
+                        break
 
     # save setting file function - David
     def saveSetting(self):
@@ -344,7 +359,45 @@ class App:
                 wb.save(filename=self.settingFileEntry.get()+".xlsx")
 
     def loadSetting(self):
-        pass
+        if self.settingFileEntry.get() and (not self.settingFileEntry.get().isspace()):
+            if os.path.exists(self.settingFileEntry.get()+'.xlsx'):
+                if self.areaObject or self.rawImgName:
+                    response = messagebox.askyesno("Question","This action will merge the current setting with setting in file, continues?")
+                else:
+                    response = True
+                
+                if response:
+                    self.var_checkB1.set(False)
+                    wb = openpyxl.load_workbook(filename=self.settingFileEntry.get()+".xlsx",data_only=True)
+                    sheet = wb['Sheet1']
+                    setting = []
+                    for value in sheet.iter_rows(values_only=True):
+                        setting.append(value)
+                    for data in setting:
+                        if data[0]=='AICOLOR':
+                            self.aiColor.set(data[1])
+                        if data[0]=='AREA':
+                            self.areaName.append(data[1])
+                            self.nameObject.append(self.canvas.create_text(data[2]+3, data[3]-10, text=str(data[1]), fill="LIME", font=('Helvetica 15'), anchor='w'))
+                            self.areaNumber = self.areaNumber + 1
+                            self.areaCoord.append([data[2], data[3], data[4], data[5]])
+                            self.areaObject.append(self.canvas.create_rectangle(data[2], data[3], data[4], data[5],fill="",outline= "LIME"))
+                            self.aiResult.append(None)
+                        if data[0]=='MAPPING':
+                            self.rawImgName.append(data[1])
+                            self.rawLabel.append(str(data[2]))
+                        if data[0]=='INTERVAL':
+                            self.hour_cb.current(int(data[1]))
+                            self.minute_cb.current(int(data[2]))
+                            self.second_cb.current(int(data[3]))
+                        if data[0]=='LOGFILE':
+                            self.logFileEntry.delete(0,END)
+                            self.logFileEntry.insert(END,data[1])
+                        if data[0]=='LOGFORMAT':
+                            self.logFormatEntry.delete(0,END)
+                            self.logFormatEntry.insert(END,data[1])
+                    self.selectArea_cb['values']=self.areaName
+                    self.selectArea_cb['state']='readonly'
                     
                 
         
@@ -352,13 +405,37 @@ class App:
         pass
     
     def resetSetting(self):
-        pass
+        self.var_checkB1.set(False)
+        self.areaObject=[]
+        self.nameObject=[]
+        self.areaName=[]
+        self.areaNumber=0
+        self.areaCoord=[]
+        self.aiResult=[]
+        self.rawImgName=[]
+        self.rawLabel=[]
+        self.selectArea_cb['values']=self.areaName
+        self.selectArea_cb['state']='readonly'
+        self.hour_cb.current(0)
+        self.minute_cb.current(0)
+        self.second_cb.current(0)
+        self.logFileEntry.delete(0,END)
+        self.logFileEntry.insert(END,'log.csv')
+        self.logFormatEntry.delete(0,END)
+        self.logFormatEntry.insert(END,'[$DATE],[$TIME],[1][2]:[3][4]')
 
     def setInterval(self,event):
         pass
 
     def saveLogFile(self):
-        pass
+        if self.logFileEntry.get() and not self.logFileEntry.get().isspace():
+            template = self.logFormatEntry.get()
+                        
+            result=template
+            for k,v in self.aiResultDict.items():
+                result = result.replace('[' + k + ']', str(v))
+            with open(self.logFileEntry.get(), 'a', newline='') as file:
+                file.write(result + '\n')
 
     def openLogFile(self):
         pass
@@ -387,10 +464,64 @@ class App:
         pass
     
     def trainAI(self):
-        pass
+        if self.var_checkB1.get() and self.rawImgName:
+            print('Start AI')
+            trainImg=[]
+            trainLabel=[]
+            for index, name in enumerate(self.rawImgName):
+                    trainImg.append(prepareImageF('./reference/'+name, nSize,display=self.var_showTrainImg.get(),color=self.aiColor.get()))
+                    trainLabel.append(str(self.rawLabel[index]))
+            for j in range(9):
+                for index, name in enumerate(self.rawImgName):
+                    trainImg.append(prepareImageF('./reference/'+name, nSize,display=False,color=self.aiColor.get()))
+                    trainLabel.append(str(self.rawLabel[index]))
+            
+            # Define the model architecture
+            self.aiModel= KNeighborsClassifier()
+            
+            
+            # training
+            self.aiModel.fit(trainImg, trainLabel)
+
+            # start prediction
+            self.runAI()
+        else:
+            print('AI stopped')
+            if not self.rawImgName:
+                response = messagebox.showinfo("Info","No training data!")
+            self.var_checkB1.set(False)
 
     def runAI(self):
-        pass
+        if self.var_checkB1.get():
+            if self.areaObject:
+                ret,frame=self.vid.get_frame()
+                counter = 0
+                now = datetime.now()
+                self.aiResultDict['$DATE']=now.date()
+                self.aiResultDict['$TIME']=now.time()
+                for area in self.areaCoord:
+                    startCol,startRow,endCol,endRow=area
+                    
+                    crop = frame[int(startRow):int(endRow),int(startCol):int(endCol)]
+                    test_x=[]
+                    test_x.append(prepareImageM(crop, nSize,display=self.var_showTestImg.get(),color=self.aiColor.get()))
+                    predicted = self.aiModel.predict(test_x)
+                    
+                    print('['+self.areaName[counter]+']', predicted[0],end=' ')
+                    self.aiResultDict[self.areaName[counter]]=predicted[0]
+                    if self.aiResult[counter]:
+                        self.canvas.delete(self.aiResult[counter])
+                    self.aiResult[counter]=self.canvas.create_text(startCol+3, endRow+12, text=predicted[0], fill="RED", font=('Helvetica 15'), anchor = 'w')
+                    
+                    counter = counter + 1
+                print("",end="\r")
+                if self.logInterval != 0:
+                    next_datetime = self.lastLogTime + timedelta(seconds=self.logInterval)
+                    if now >= next_datetime:
+                        self.saveLogFile()
+                        self.lastLogTime=now
+
+            self.window.after(500, self.runAI)
 
 
 def checkImage(image):
