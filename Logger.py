@@ -2,7 +2,7 @@
 #301296260 Chung Ching Lai
 #301279252 Man Fai Kwan
 #301282811 Man Chun Lam
-#3xxxxxxxx yyyyyyyyyyyyyyy
+#301272631 Fatima Khalid
 #3xxxxxxxx yyyyyyyyyyyyyyy
 #3xxxxxxxx yyyyyyyyyyyyyyy
 import cv2
@@ -381,7 +381,15 @@ class App:
         self.selectArea_cb['state']='readonly'
   
     def changeOverlayLine(self):
-        pass
+        if self.vOverLine.get()=='CENT':
+            self.overLine1=self.canvas.create_line(0, 240, self.xLimit , 240,fill='GREEN',state='hidden')
+            self.overLine2=self.canvas.create_line(320, 0, 320 , self.yLimit,fill='GREEN',state='hidden')
+        elif self.vOverLine.get()=='GRID':
+            for i in range(0,self.xLimit, 80):
+                self.overGrid.append(self.canvas.create_line(i, 0, i , 479,fill='GREEN',state='hidden'))
+            for j in range(0,self.yLimit, 80):
+                self.overGrid.append(self.canvas.create_line(0, j, 639 , j,fill='GREEN',state='hidden'))
+
 
     def changeAIColor(self):
         pass
