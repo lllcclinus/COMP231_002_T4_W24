@@ -425,7 +425,7 @@ class App:
         self.logFormatEntry.insert(END,'[$DATE],[$TIME],[1][2]:[3][4]')
 
     def setInterval(self,event):
-        pass
+        self.logInterval = int(self.hour_cb.get())*60*60 + int(self.minute_cb.get())*60 + int(self.second_cb.get())
 
     def saveLogFile(self):
         if self.logFileEntry.get() and not self.logFileEntry.get().isspace():
