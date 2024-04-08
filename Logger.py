@@ -469,7 +469,7 @@ class App:
 
 
     def changeAIColor(self):
-        pass
+        self.var_checkB1.set(False)
     
     def trainAI(self):
         if self.var_checkB1.get() and self.rawImgName:
@@ -554,6 +554,19 @@ def prepareImageM(image,nsize,display=False,color='COLOR'):
     return tv
 
 def prepareImageF(file, nsize,display=False,color='COLOR'):
-    pass
+    if color=='COLOR':
+        image = cv2.imread(file, cv2.IMREAD_COLOR)
+    if color=='GRAY' or color=='BW':
+        image = cv2.imread(file, cv2.IMREAD_GRAYSCALE)
 
+    image = cv2.resize(image, (nsize, nsize))   
+    if color=='BW':
+        (thresh, image) = cv2.threshold(image, 128, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
+    
+    if display:
+        checkImage(image)
+    tv = np.array(image.flat)
+    return tv
+
+### MAIN ########################################
 App(Tk(), "Automatic data logger"+" "+version,0)
