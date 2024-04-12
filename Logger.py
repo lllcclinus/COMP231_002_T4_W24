@@ -5,6 +5,11 @@
 #301272631 Fatima Khalid
 #3xxxxxxxx yyyyyyyyyyyyyyy
 #3xxxxxxxx yyyyyyyyyyyyyyy
+#Date Last Modified: <2024-04-12>
+#Program Title: Automatic Data Logger
+#Version : 00
+#Revision History:
+# V00 - 2024-04-12 First release
 import cv2
 from tkinter import *
 import tkinter.ttk as ttk
@@ -27,6 +32,10 @@ displayTime = 300      #eg 500 = 0.5 sec , 0=inf
 ################################################
 
 class MyVideoCapture:
+    # This class is used to access Camera
+    #
+    # Methods:
+    # - get_frame(): get frame data from Camera
     def __init__(self, video_source=0):
         # Open the video source
         if demoMode:
@@ -45,10 +54,14 @@ class MyVideoCapture:
  
     # Release the video source when the object is destroyed
     def __del__(self):
+        # release Camera source
+        # Return: None
         if self.vid.isOpened():
             self.vid.release()
     
     def get_frame(self):
+        # get frame data
+        # return: frame data
         if self.vid.isOpened():
             ret, frame = self.vid.read()
 
@@ -64,6 +77,7 @@ class MyVideoCapture:
 
 
 class App:
+    # This class is used to display UI for monitoring and operation
     def __init__(self, window, window_title, video_source=0):
         self.window = window
         self.window.title(window_title)
@@ -217,18 +231,22 @@ class App:
         self.window.mainloop()
 
     def update(self):
-        # Get a frame from the video source
+        # redraw a frame from the video source
+        # redraw screen objects
+        # return: none
         ret, frame = self.vid.get_frame()
         
         if ret:
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             self.photo = ImageTk.PhotoImage(image = Image.fromarray(frame))
             self.canvas.create_image(0, 0, image = self.photo, anchor = 'nw')
+            # redraw cross line objects
             if self.line1:
                 self.canvas.itemconfig(self.line1, state='normal')
                 self.canvas.itemconfig(self.line2, state='normal')
                 self.canvas.tag_raise(self.line1)
                 self.canvas.tag_raise(self.line2)
+            # redraw overlay lines objects
             if self.vOverLine.get()!='NONE':
                 if self.vOverLine.get()=='CENT':
                     self.canvas.itemconfig(self.overLine1, state='normal')
@@ -239,13 +257,16 @@ class App:
                     for gridLine in self.overGrid:
                         self.canvas.itemconfig(gridLine, state='normal')
                         self.canvas.tag_raise(gridLine)
+            # redraw rectangle on the fly
             if self.setArea:
                 self.temporaryArea=self.canvas.create_rectangle(self.startX, self.startY, self.currentX, self.currentY,fill="",outline= "GREEN")
+            # redraw area rectangles
             if self.areaObject:
                 for area in self.areaObject:
                     self.canvas.tag_raise(area)
                 for name in self.nameObject:
                     self.canvas.tag_raise(name)
+            # redraw AI objects
             if self.var_checkB1.get():
                 for result in self.aiResult:
                     if result:
@@ -292,10 +313,14 @@ class App:
 
         
     def b3button(self,event):
+        # Cancel drawing rectangle
+        # return: none
         self.setArea=False
         self.temporaryArea=None
 
     def save(self):
+        # Capture area screenshots and save into file
+        # return: none
         if self.selectArea_cb.get():
             response = False
             if os.path.exists('./reference/'+self.captureFileEntry.get()+'.bmp'):
@@ -315,6 +340,8 @@ class App:
 
     # save setting file function - David
     def saveSetting(self):
+        # save setting file
+        # return: none
         saveFile=False
         if self.settingFileEntry.get() and (not self.settingFileEntry.get().isspace()):
             if os.path.exists(self.settingFileEntry.get()+'.xlsx'):
@@ -359,6 +386,8 @@ class App:
                 wb.save(filename=self.settingFileEntry.get()+".xlsx")
 
     def loadSetting(self):
+        # Load setting file
+        # return: none
         if self.settingFileEntry.get() and (not self.settingFileEntry.get().isspace()):
             if os.path.exists(self.settingFileEntry.get()+'.xlsx'):
                 if self.areaObject or self.rawImgName:
@@ -402,9 +431,13 @@ class App:
                 
         
     def openSetting(self):
+        # open setting file
+        # retrun: none
         pass
     
     def resetSetting(self):
+        # Clear all setting and reset to default states
+        # return: none
         self.var_checkB1.set(False)
         self.areaObject=[]
         self.nameObject=[]
@@ -425,9 +458,13 @@ class App:
         self.logFormatEntry.insert(END,'[$DATE],[$TIME],[1][2]:[3][4]')
 
     def setInterval(self,event):
+        # set interval time
+        # return: none
         self.logInterval = int(self.hour_cb.get())*60*60 + int(self.minute_cb.get())*60 + int(self.second_cb.get())
 
     def saveLogFile(self):
+        # save log file insert value according to format setting
+        # return: none
         if self.logFileEntry.get() and not self.logFileEntry.get().isspace():
             template = self.logFormatEntry.get()
                         
@@ -438,10 +475,14 @@ class App:
                 file.write(result + '\n')
 
     def openLogFile(self):
+        # open log file
+        # return : none
         pass
 
     #delete area - David
     def deleteArea(self):
+        # delete an Area
+        # return: none
         scanAll=False
         while(not scanAll):
             scanAll=True
@@ -458,6 +499,8 @@ class App:
         self.selectArea_cb['state']='readonly'
   
     def changeOverlayLine(self):
+        # Change overlay Lines
+        # return: none
         if self.vOverLine.get()=='CENT':
             self.overLine1=self.canvas.create_line(0, 240, self.xLimit , 240,fill='GREEN',state='hidden')
             self.overLine2=self.canvas.create_line(320, 0, 320 , self.yLimit,fill='GREEN',state='hidden')
@@ -469,9 +512,13 @@ class App:
 
 
     def changeAIColor(self):
+        # Select color for AI traing and recognization
+        # return: none
         self.var_checkB1.set(False)
     
     def trainAI(self):
+        # Training AI and create AI model
+        # return : none
         if self.var_checkB1.get() and self.rawImgName:
             print('Start AI')
             trainImg=[]
@@ -500,6 +547,8 @@ class App:
             self.var_checkB1.set(False)
 
     def runAI(self):
+        # Consume AI model to recognize digits
+        # return: none
         if self.var_checkB1.get():
             if self.areaObject:
                 ret,frame=self.vid.get_frame()
@@ -533,13 +582,16 @@ class App:
 
 
 def checkImage(image):
+    # display image under test
+    # return : none
     cv2.imshow('Check Image', image)
     cv2.moveWindow('Check Image', 40+640+20,40)
     cv2.waitKey(displayTime)
 
  # Change image color to balck and white
 def prepareImageM(image,nsize,display=False,color='COLOR'):
-    # CV2===============
+    # select color of image in memory
+    # return: none
     if color=='GRAY' or color=='BW':
         image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
@@ -554,6 +606,8 @@ def prepareImageM(image,nsize,display=False,color='COLOR'):
     return tv
 
 def prepareImageF(file, nsize,display=False,color='COLOR'):
+    # select color of image in file
+    # return: none
     if color=='COLOR':
         image = cv2.imread(file, cv2.IMREAD_COLOR)
     if color=='GRAY' or color=='BW':
@@ -569,4 +623,5 @@ def prepareImageF(file, nsize,display=False,color='COLOR'):
     return tv
 
 ### MAIN ########################################
+# Start Main GUI 
 App(Tk(), "Automatic data logger"+" "+version,0)
