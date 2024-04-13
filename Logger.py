@@ -18,10 +18,8 @@ from PIL import Image, ImageTk
 import numpy as np
 import openpyxl
 from sklearn.neighbors import KNeighborsClassifier
-import time
 import os
 from datetime import datetime ,timedelta
-import re
 
 version="V00"
 demoMode=True
@@ -31,6 +29,59 @@ nSize   = 50     #pixel of training images
 displayTime = 300      #eg 500 = 0.5 sec , 0=inf
 ################################################
 
+
+class AppLogin:
+    # Login Page
+    def __init__(self, master):
+        self.master = master
+        self.master.title('Login')
+        self.master.geometry("200x120+500+300")
+
+        self.username = None
+        self.password = None
+
+        # Username
+        self.label_username = Label(master, text="Username")
+        self.label_username.grid(row=0, column=0, sticky='e')
+        self.entry_username = Entry(master)
+        self.entry_username.grid(row=0, column=1)
+
+        # Password
+        self.label_password = Label(master, text="Password")
+        self.label_password.grid(row=1, column=0, sticky='e')
+        self.entry_password = Entry(master, show="*")
+        self.entry_password.grid(row=1, column=1)
+
+        # Login button
+        self.login_button = Button(master, text="Login", command=self.check_login)
+        self.login_button.grid(row=2, column=0, columnspan=2)
+
+        # Message label
+        self.message_label = Label(master, text="Username: admin", fg="blue")
+        self.message_label.grid(row=3, column=0, columnspan=2, sticky='w')
+        self.message_label = Label(master, text="Password: password", fg="blue")
+        self.message_label.grid(row=4, column=0, columnspan=2, sticky='w')
+
+        master.protocol("WM_DELETE_WINDOW", self.on_close)
+        # This makes the window wait until the login is successful or the window is closed
+        self.master.mainloop()
+
+    def check_login(self):
+        # Hard-coded credentials for demonstration; replace with your authentication method
+        username = self.entry_username.get()
+        password = self.entry_password.get()
+
+        if username == "admin" and password == "password":
+            messagebox.showinfo("Login Info", "Welcome!")
+            self.master.destroy()  # Close the login window
+        else:
+            messagebox.showerror("Login Info", "Incorrect username or password")
+    
+    def on_close(self):
+        # This method is called when the window is closed
+        if messagebox.askokcancel("Quit", "Do you want to quit?"):
+            self.master.destroy()
+            os._exit(0)
 class MyVideoCapture:
     # This class is used to access Camera
     #
@@ -433,7 +484,10 @@ class App:
     def openSetting(self):
         # open setting file
         # retrun: none
-        pass
+        if not os.path.exists(self.settingFileEntry.get()+'.xlsx'):
+            response = messagebox.showinfo("Info","File does not exist!")
+        else:
+            os.system("start EXCEL.EXE "+ self.settingFileEntry.get()+".xlsx")
     
     def resetSetting(self):
         # Clear all setting and reset to default states
@@ -477,7 +531,11 @@ class App:
     def openLogFile(self):
         # open log file
         # return : none
-        pass
+        if not os.path.exists(self.logFileEntry.get()):
+            response = messagebox.showinfo("Info","File does not exist!")
+        else:
+            os.system("start NOTEPAD.EXE "+ self.logFileEntry.get())
+
 
     #delete area - David
     def deleteArea(self):
@@ -624,4 +682,7 @@ def prepareImageF(file, nsize,display=False,color='COLOR'):
 
 ### MAIN ########################################
 # Start Main GUI 
+#Start Login Page
+AppLogin(Tk())
+#Start main GUI
 App(Tk(), "Automatic data logger"+" "+version,0)
