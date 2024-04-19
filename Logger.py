@@ -470,6 +470,7 @@ class App:
                             self.hour_cb.current(int(data[1]))
                             self.minute_cb.current(int(data[2]))
                             self.second_cb.current(int(data[3]))
+                            self.logInterval = int(self.hour_cb.get())*60*60 + int(self.minute_cb.get())*60 + int(self.second_cb.get())
                         if data[0]=='LOGFILE':
                             self.logFileEntry.delete(0,END)
                             self.logFileEntry.insert(END,data[1])
